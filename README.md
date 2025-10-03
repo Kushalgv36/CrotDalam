@@ -1,24 +1,59 @@
-# CROT DALAM — TikTok OSINT (No‑API)
+## 🖼️ CROT DALAM — TikTok OSINT (No-API)
+
+```
+█████████                      █████       ██████████             ████                              
+  ███░░░░░███                    ░░███       ░░███░░░░███           ░░███                              
+ ███     ░░░  ████████   ██████  ███████      ░███   ░░███  ██████   ░███   ██████   █████████████    
+░███         ░░███░░███ ███░░███░░░███░       ░███    ░███ ░░░░░███  ░███  ░░░░░███ ░░███░░███░░███   
+░███          ░███ ░░░ ░███ ░███  ░███        ░███    ░███  ███████  ░███   ███████  ░███ ░███ ░███   
+░░███     ███ ░███     ░███ ░███  ░███ ███    ░███    ███  ███░░███  ░███  ███░░███  ░███ ░███ ░███   
+ ░░█████████  █████    ░░██████   ░░█████     ██████████  ░░████████ █████░░████████ █████░███ █████  
+  ░░░░░░░░░  ░░░░░      ░░░░░░     ░░░░░     ░░░░░░░░░░    ░░░░░░░░ ░░░░░  ░░░░░░░░ ░░░░░ ░░░ ░░░░░   
+           
+Code By sudo3rs
+Collection & Reconnaissance Of TikTok — Discovery, Analysis, Logging, And Monitoring
+```
+
+---
+
 
 > **C**ollection & **R**econnaissance **O**f **T**ikTok — **D**iscovery, **A**nalysis, **L**ogging, **A**nd **M**onitoring
 
-**CROT DALAM** is a Python CLI that performs **OSINT on TikTok without any API keys**. It drives a real Chromium browser (via Playwright) to search public TikTok pages by keyword, extracts video metadata, applies scam/phishing **risk heuristics** (EN/ID), and exports **JSONL + CSV** (optionally **screenshots** for evidence).
+**CROT DALAM** is a Python CLI that performs **OSINT on TikTok without any API keys**. It drives a real Chromium browser (via Playwright) to search public TikTok pages by keyword, extracts video metadata, applies scam/phishing **risk heuristics** (EN/ID), and exports **JSONL, CSV, and HTML** (plus optional **screenshots**, **video downloads**, and **Archive.today** snapshots).
 
-> ⚠️ For public OSINT only. Respect local laws and platform terms. Do not use on private data or accounts.
+> ⚠️ For public OSINT only. Respect local laws and platform terms. Do **not** use on private data or accounts.
+
+---
+
+## 🆕 What's New (2025-10-03)
+
+- **Investigation Modes**: `--mode {quick|moderate|deep|deeper}` presets screenshots/comments/pivot/download/archive.
+- **URL Extraction** from descriptions → appears in **CSV/JSONL/HTML**.
+- **HTML Report**: clean, sortable-friendly table with risk highlighting.
+- **Robust scraping**: better selectors, cookie-banner handling, lazy-load scroll, and improved error handling.
+- **Metrics parsing**: safe parsing for `1.2K`, `3.4M`, commas, etc.
+- **Date parsing** from `<time datetime="…">` when available.
+- **Hashtag Pivot**: `--pivot-hashtags N` auto-expands search to top hashtags found.
+- **Comment Scraping**: `--comments N` collects top comments for context.
+- **Video Downloads**: via **yt-dlp** with **autodetect** fallback to `python -m yt_dlp`.
+- **New flag** `--ytdlp-bin` and **env** `YTDLP_BIN` for custom locations.
+- **Archive.today snapshots**: `--web-archive` posts URLs for archiving.
 
 ---
 
 ## ✨ Features
+
 - **No API keys** – scrapes public search & video pages using Playwright
 - **Keyword OSINT** – search multiple keywords in one run
 - **Risk scoring** – heuristic match for scam/phishing/fake promo terms (EN & Bahasa Indonesia)
-- **Evidence** – optional full‑page screenshots per video
-- **Exports** – structured **JSONL** and **CSV** for downstream analysis
-- **Controls** – headless/visible mode, locale, proxy, custom UA, per‑keyword caps
+- **Entity hints** – extract **hashtags**, **URLs**, **basic comments**
+- **Evidence** – optional full-page **screenshots**, optional **video downloads** (yt-dlp), and **Archive.today** snapshots
+- **Exports** – structured **JSONL/CSV** + polished **HTML report**
+- **Controls** – headless/visible mode, locale, proxy, custom UA, per-keyword caps, investigation modes
 
 ---
 
-## 🧠 How it works (Flow)
+## 🧠 How it Works
 
 ### High Level
 ```mermaid
@@ -35,7 +70,8 @@ flowchart TD
     J --> K[Console summary]
 ```
 
-### Sequence
+### Sequence (simplified)
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -44,167 +80,166 @@ sequenceDiagram
     participant PW as Playwright Chromium
     participant T as TikTok (public)
 
-    U->>CLI: search "phishing" "promo gratis" --limit 80
-    CLI->>PW: launch headless context (locale, UA, proxy)
+    U->>CLI: search "undian berhadiah" --mode deep --limit 60
+    CLI->>PW: Launch context (locale, UA, proxy)
     PW->>T: GET /search?q=...
-    T-->>PW: Search results page
-    CLI->>PW: scroll & parse anchors (/video/...)
-    loop For each video URL
+    T-->>PW: Results page
+    CLI->>PW: Scroll & collect /video/ links
+    loop For each video
         PW->>T: GET /@user/video/<id>
         T-->>PW: Video page
-        CLI->>PW: extract JSON-LD, meta tags, DOM
-        CLI->>CLI: risk_score(description)
-        alt with --screenshot
-            CLI->>PW: screenshot full page
+        CLI->>PW: Extract desc/metrics/hashtags/date/comments
+        CLI->>CLI: risk_score(desc) & extract_urls(desc)
+        alt Mode options
+            CLI->>PW: Screenshot / yt‑dlp / Archive.today
         end
     end
-    CLI-->>U: Save .jsonl, .csv + summary
+    CLI-->>U: Save .jsonl, .csv, .html (+ evidence dirs)
 ```
-
-**Risk Heuristics (examples)**
-- EN: `scam`, `phishing`, `smishing`, `click link`, `free iphone`, `crypto giveaway`, `OTP`, `verification code`, `KYC`
-- ID: `penipuan`, `modus`, `phising`, `klik link`, `tautan di bio`, `transfer dulu`, `deposit dulu`, `langsung cair`, `kode OTP`, `jangan kasih OTP`
 
 ---
 
 ## 🧰 Installation
+
 ```bash
 # Python 3.10+
-python -m pip install playwright typer rich
+python -m pip install playwright typer rich requests
 python -m playwright install chromium
+
+# (Optional) yt-dlp for video downloads
+# Windows (choose one):
+winget install yt-dlp.yt-dlp
+# or
+choco install yt-dlp
+# Cross-platform alternatives:
+pipx install yt-dlp
+# or
+python -m pip install --user yt-dlp
 ```
-> **Linux notes:** Playwright will fetch Chromium. If it complains about system libs, install common deps (e.g., `libnss3`, `libatk1.0-0`, `libx11` family) via your distro’s package manager.
+
+> **Windows PATH tip** (if using `pip --user`): add something like `C:\\Users\\<USER>\\AppData\\Roaming\\Python\\Python3X\\Scripts` to your PATH, then open a new terminal.
+
+Validate installs:
+
+```bash
+playwright --version
+where yt-dlp   # Windows
+which yt-dlp   # macOS/Linux
+```
 
 ---
 
 ## 🚀 Usage
-**Basic search (headless)**
+
+### Quickstart
+
 ```bash
-python crot_dalam.py search "phishing" "scam" --limit 80 --out out/crot_dalam
+python crot_dalam.py search "undian berhadiah" --mode deep --limit 60 --out out/crot_dalam
 ```
 
-**Visible browser + Indonesian locale + screenshots**
+### Common Examples
+
 ```bash
-python crot_dalam.py search "promo gratis" \
-  --locale id-ID --headless false --screenshot --limit 40
+# Visible browser + Indonesian locale + screenshots
+python crot_dalam.py search "promo gratis" --locale id-ID --headless false --screenshot --limit 40
+
+# Pivot by top 3 hashtags found + collect 15 comments per video
+python crot_dalam.py search "giveaway resmi" --pivot-hashtags 3 --comments 15 --limit 80
+
+# Deep mode + downloads + archive snapshots
+python crot_dalam.py search "transfer dulu" --mode deep --download --web-archive --limit 50
+
+# Custom UA + Proxy
+python crot_dalam.py search "binary option" --user-agent "Mozilla/5.0 ..." \
+  --proxy http://user:pass@host:port --limit 30
+
+# If yt-dlp is installed in a custom path
+python crot_dalam.py search "undian berhadiah" --download --ytdlp-bin "C:\\Tools\\yt-dlp.exe"
+
+# Or use Python module launcher as a fallback
+set YTDLP_BIN=python
+python crot_dalam.py search "undian berhadiah" --download
 ```
 
-**Per‑keyword cap** (distribute total among keywords or force a per‑keyword number)
-```bash
-# total limit shared across keywords (default behavior)
-python crot_dalam.py search "phishing" "giveaway" --limit 100
+### Outputs
 
-# force per‑keyword cap of 60 (up to 120 total if two keywords)
-python crot_dalam.py search "phishing" "giveaway" --per-keyword-limit 60 --limit 120
-```
-
-**Custom UA + Proxy**
-```bash
-python crot_dalam.py search "binary option" \
-  --user-agent "Mozilla/5.0 ..." \
-  --proxy http://user:pass@host:port \
-  --limit 50
-```
-
-**Output**
 ```
 out/
   ├─ crot_dalam.jsonl   # one JSON object per line
-  ├─ crot_dalam.csv     # table with common fields
-  └─ screenshots/       # optional PNGs (one per video)
+  ├─ crot_dalam.csv     # flat table with common fields
+  ├─ crot_dalam.html    # polished HTML report (risk highlights, URLs)
+  ├─ screenshots/       # optional PNGs (one per video)
+  └─ videos/            # optional downloads via yt-dlp
 ```
 
 ---
 
-## 📚 Libraries used
-- **Playwright** – headless Chromium automation
-- **Typer** – ergonomic CLI
-- **Rich** – pretty console output
-- Python stdlib: `json`, `csv`, `re`, `pathlib`, `urllib.parse`, etc.
+## 🔧 CLI Options (key)
+
+| Option                     | Type                            | Default          | Description                                                         |
+| -------------------------- | ------------------------------- | ---------------- | ------------------------------------------------------------------- |
+| `keyword...`               | list[str]                       | –                | One or more keywords to search (quote for phrases)                  |
+| `--mode`                   | `quick\\|moderate\\|deep\\|deeper` | `quick`          | Investigation presets (screenshots/comments/pivot/download/archive) |
+| `--limit`                  | int                             | `60`             | Approx. max videos per query                                        |
+| `--out`                    | path                            | `out/crot_dalam` | Output basename (no extension)                                      |
+| `--headless/--no-headless` | bool                            | `True`           | Headless browser toggle                                             |
+| `--locale`                 | str                             | `en-US`          | Browser locale (e.g., `id-ID`)                                      |
+| `--screenshot`             | bool                            | `False`          | Save full-page PNG per video                                        |
+| `--download`               | bool                            | `False`          | Download videos via yt-dlp                                          |
+| `--web-archive`            | bool                            | `False`          | Submit URLs to Archive.today                                        |
+| `--comments`               | int                             | `0`              | Scrape N comments per video                                         |
+| `--pivot-hashtags`         | int                             | `0`              | Auto-search top N hashtags found                                    |
+| `--proxy`                  | str                             | –                | `http://user:pass@host:port`                                        |
+| `--user-agent`             | str                             | –                | Custom UA string                                                    |
+| `--ytdlp-bin`              | str                             | –                | Path/name of yt-dlp binary (or set `YTDLP_BIN`)                     |
 
 ---
 
-## 🔎 Use cases
-- **Threat intel & OSINT:** monitor trending scams, phishing campaigns, fake promos
-- **Brand protection:** find imposters abusing brand names, fake giveaways, coupon scams
-- **Financial fraud monitoring:** identify crypto/forex signal scams & Ponzi promos
-- **Awareness & education:** collect real examples to brief stakeholders
+## 🔎 Risk Heuristics (examples)
 
----
+- **EN**: `free giveaway`, `airdrop`, `verify wallet`, `seed phrase`, `private key`, `limited slots`, `processing fee`, `send first` …
+- **ID**: `undian berhadiah`, `bagi-bagi saldo`, `transfer dulu`, `biaya admin dulu`, `pinjol cair`, `slot gacor`, `hubungi admin`, `kode rahasia` …
+- **Regex hints**: Indonesian phone/WA, crypto wallets (BTC/ETH/TRX), etc.
 
-## 🧪 Sample commands
-```bash
-# 1) Quick crawl, 80 items total
-python crot_dalam.py search "phishing" "scam" --limit 80 --out out/crot
-
-# 2) Evidence screenshots
-python crot_dalam.py search "giveaway" --screenshot --limit 40
-
-# 3) Bahasa keywords, visible mode
-python crot_dalam.py search "promo gratis" "transfer dulu" --locale id-ID --headless false --limit 60
-
-# 4) Proxy + custom UA
-python crot_dalam.py search "binary option" --proxy http://127.0.0.1:8080 \
-  --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ..." --limit 30
-```
+> Heuristics are intentionally broad (recall > precision). Treat hits as **signals**, not proof. Review evidence (screenshots/HTML) before conclusions.
 
 ---
 
 ## 🗺️ Roadmap
-- [ ] **Entity extraction** (user mentions, tagged accounts, URLs in description)
-- [ ] **Language detection** + per‑language risk terms
-- [ ] **Config file** (YAML) for reusable runs & keyword sets
-- [ ] **SQLite/Parquet backend** + dashboards (DuckDB/Polars)
-- [ ] **Schedulers** (cron‑style pulls) + daily diffs
-- [ ] **Rotating proxies & backoff** to handle rate limiting gracefully
-- [ ] **Dockerfile** for reproducible deployments
-- [ ] **Dedup & canonicalization** across reruns
-- [ ] **Pivoting** (auto‑follow hashtags/users from hits)
-- [ ] **Packaging** (pipx/pyproject) and single‑file binaries (PyInstaller)
+
+- Still thingking what i should do next ? (if yo had any idea please tell me )
 
 ---
 
 ## ✅ Pros / ⚠️ Cons
+
 **Pros**
-- No API keys; works only with public web UI
-- Evidence‑friendly (screenshots) & exports for SOC workflows
-- Multilingual heuristic risk matching (EN/ID included)
-- Flexible controls (locale, UA, proxy)
+
+- No API keys; works on the public web UI
+- Evidence-friendly (screenshots/HTML) & exports for SOC workflows
+- Multilingual heuristics (EN/ID shipped) with extensibility
+- Flexible controls (locale, UA, proxy, modes)
 
 **Cons**
-- Web UI may change → selectors can break (maintenance needed)
-- Slower than official APIs; subject to rate limiting / bot mitigation
-- Login‑gated/private content is out of scope
-- Counts/fields may be partial or delayed depending on page structure
+
+- UI can change → selectors need maintenance
+- Slower than official APIs; subject to rate limiting/bot checks
+- Private/login-gated content is out-of-scope
 
 ---
 
-## 🔐 Ethics & legality
-Use on **public information** only. Follow TikTok’s terms and applicable laws in your jurisdiction. This tool is intended for research, security awareness, and protective monitoring.
+## 🔐 Ethics & Legality
 
----
-
-## 🖼️ Banner (shown on start)
-```
-█████████                      █████       ██████████             ████                              
-  ███░░░░░███                    ░░███       ░░███░░░░███           ░░███                              
- ███     ░░░  ████████   ██████  ███████      ░███   ░░███  ██████   ░███   ██████   █████████████     
-░███         ░░███░░███ ███░░███░░░███░       ░███    ░███ ░░░░░███  ░███  ░░░░░███ ░░███░░███░░███    
-░███          ░███ ░░░ ░███ ░███  ░███        ░███    ░███  ███████  ░███   ███████  ░███ ░███ ░███    
-░░███     ███ ░███     ░███ ░███  ░███ ███    ░███    ███  ███░░███  ░███  ███░░███  ░███ ░███ ░███    
- ░░█████████  █████    ░░██████   ░░█████     ██████████  ░░████████ █████░░████████ █████░███ █████   
-  ░░░░░░░░░  ░░░░░      ░░░░░░     ░░░░░     ░░░░░░░░░░    ░░░░░░░░ ░░░░░  ░░░░░░░░ ░░░░░ ░░░ ░░░░░    
-           
-Code By sudo3rs
-Collection & Reconnaissance Of TikTok — Discovery, Analysis, Logging, And Monitoring
-```
+Use on **public information** only. Follow TikTok’s terms and laws in your jurisdiction. Intended for research, security awareness, and protective monitoring.
 
 ---
 
 ## 🤝 Contributing
-Pull requests are welcome! Improve selectors, add languages to risk heuristics, extend outputs.
+
+PRs welcome! Improve selectors, add risk terms/languages, extend outputs, or wire up new pivots (e.g., by user mentions).
 
 ---
 
 ## 📄 License
-MIT (suggested). If you prefer another license, update this section.
+
+MIT (suggested). Update this section if you prefer another license.
